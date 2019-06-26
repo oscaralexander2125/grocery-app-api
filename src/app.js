@@ -4,6 +4,11 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
+const usersRouter = require('./users/users-router');
+const authRouter = require('./auth/auth-router');
+const passport = require('passport');
+const {localStrategy, jwtStrategy} = require('./auth/strategies');
+
 
 
 const app = express()
@@ -12,9 +17,17 @@ const morganOption = (NODE_ENV === 'production')
   ? 'tiny'
   : 'common';
 
+app.use(express.json());
 app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
+
+passport.use(localStrategy);
+passport.use(jwtStrategy);
+
+app.use('/api/users', usersRouter);
+app.use('/api/auth', authRouter);
+
 
 app.get('/', (req, res) => {
   res.status(200).send('Hello, world!')
